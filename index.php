@@ -110,7 +110,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
             </script>
 
             <!--字段 生成规则 表格-->
-                <table id="select_table" class="table table-striped" >
+                <table id="select_table" hidden class="table table-striped" >
                     <thead >
                     <tr >
                         <th data-field="key">列名</th>
@@ -123,12 +123,12 @@ placeholder='CREATE TABLE `im_feed_reply` (
                     </tbody>
                 </table>
 
-
+<div id="btn_group_gen" hidden>
             <!-- 生成SQL的条数等 -->
-            <div class="col-md-4 column">
+            <div class="col-md-4 column" >
                 <button id="btn_commit_sql" type="submit" class="btn btn-info btn-default">生成SQL语句</button>
             </div>
-            <div class="col-md-4 column">
+            <div class="col-md-4 column" >
                 <form class="form-horizontal" role="form">
                     <div class="form-group">
                         <div class="col-sm-3">
@@ -149,10 +149,17 @@ placeholder='CREATE TABLE `im_feed_reply` (
                     </div>
                 </form>
             </div>
+</div>
             <input type="text" id="tv_tablename_hidden" value="我是表名" style="display:none" >  <!--  存放表名的隐藏字段-->
 
             <script type="text/javascript">
                 function getList(){
+                    //默认隐藏各种框
+                    var showTime =  400;
+                    $('#select_table').show(showTime);
+                    $('#btn_group_gen').show(showTime);
+                    $('#tv_group_result').show(showTime);
+
                     // jquery ajax 请求
                     $.getJSON({
                         type:'post',
@@ -411,8 +418,8 @@ placeholder='CREATE TABLE `im_feed_reply` (
 
             <br/><br/><br/><br/>
                 <!-- SQL结果 -->
-                <div class="col-md-12  column">
-                    <textarea id="sql_result" class="form-control" placeholder="我是存放 SQL 结果的地方" rows="8" ></textarea>
+                <div hidden id ="tv_group_result" class="col-md-12  column">
+                    <textarea  id="sql_result" class="form-control" placeholder="我是存放 SQL 结果的地方" rows="8" ></textarea>
                 </div>
 
         </div>

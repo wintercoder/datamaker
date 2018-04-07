@@ -135,10 +135,9 @@ class CreateSqlParser
 
         //通用配置
         $commonItem = $this->parseFileForAttribute('conf/common.ini',$key);
-        if(!empty($localItem)){
+        if(!empty($commonItem)){
             $item = $commonItem;
         }
-
         //个性化配置
         //针对你、你公司 常用的字段设置默认值，存放不可告人的数据秘密，配置文件在.gitignore里
         $localItem = $this->parseFileForAttribute('conf/local.ini',$key);
