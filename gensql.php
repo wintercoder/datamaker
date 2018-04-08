@@ -88,6 +88,31 @@ class ValueGenerator{
         }
         return $ret;
     }
+    /**
+     * 随机浮点
+     * @param $input string
+     *      闭区间生成 [from,to] 位数为 n，默认3位
+     * @param $groupSize int 每组多少条合并成一个数组，也是该次函数返回的数组大小
+     * @return array
+     */
+    public function randFloat($input,$groupSize)
+    {
+        $exp = explode(',',$input);
+        if(empty($exp)){
+            $from = 0; $to = 1;$wei = 3;
+        }else{
+            $from =  intval($exp[0]); $to = intval($exp[1]); $wei = intval($exp[2]);
+            if(empty($exp[2])) $wei = 3;
+        }
+
+        $randNum = $from + mt_rand() / mt_getrandmax() * ($to - $from);
+        $ret = [];
+        $count = 0;
+        while ($count++ < $groupSize) {
+            $ret []= sprintf("%.{$wei}f",$randNum);
+        }
+        return $ret;
+    }
 
     /**
      * 指定日期里的 随机时间戳
@@ -106,6 +131,22 @@ class ValueGenerator{
         $count = 0;
         while ($count++ < $groupSize) {
             $ret []= strtotime($from) + mt_rand(0,$diff);
+        }
+        return $ret;
+    }
+
+    /**
+     * 指定日期里的 随机时间戳 (2018-04-08 11:16:00 格式)
+     * @param $input string
+     *      [from,to] 中的时间戳
+     * @param $groupSize int 每组多少条合并成一个数组，也是该次函数返回的数组大小
+     * @return array
+     */
+    public function randTimestampMysql($input,$groupSize)
+    {
+        $ret = $this->randTimestamp($input,$groupSize);
+        foreach ($ret as &$item){
+            $item =  date("Y-m-d H:i:s",$item);
         }
         return $ret;
     }

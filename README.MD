@@ -19,7 +19,8 @@
 
 ### 配置
 `/conf/common.ini` 为通用配置  
-`/conf/local.ini` 为个性化配置，适合不宜暴露的默认值，如测试账号ID等，该文件已加入 `.gitignore` 里  
+`/conf/local.ini` 为个性化配置，适合不宜暴露的默认值，如测试账号ID等，该文件已加入 `.gitignore` 里，如果发现不生效则跑下命令
+`git update-index --assume-unchanged conf/local.ini` 
 
 配置样例：
 
@@ -43,11 +44,13 @@ way = search
 
 | 规则英文 | 中文 |  参数 |
 |----------|------|------|
-| RAND_INT | 随机int  | from,to  : 生成[from,to]闭区间整数
 | INCR_INT | 自增int  | from  : 从from开始自增，步长1
+| RAND_INT | 随机int  | from,to  : 生成[from,to]闭区间整数
+| RAND_FLOAT | 随机int  | from,to,round  : 生成[from,to]闭区间浮点，保留round位小数，这三个参数都是整数
 | INCR_DAY | 日期自增     | from  : 从from开始自增，步长1天，格式20180304
 | INCR\_DAY\_GROUPLY | 日期自增（组模式） | 同上，但每组值里的这个日期不变，下条SQL才变
 | RAND_TIMESTAMP |  随机时间戳     | from,to  : 生成[from,to]这些天里的秒级时间戳，如 20180304,20180305
+| RAND_TIMESTAMP_MYSQL |  随机时间（Mysql格式）     | from,to  : 生成[from,to]这些天里的秒级时间，格式：2018-04-07 18:08:34
 | IGNORE |   不生成该列    | 
 | CONST_STR |   常量    | 常量值
 | CONST\_STR\_LIST |   常量（指定列表）    | 输入 a,b，每条SQL都输出 a,b，此时组数固定
