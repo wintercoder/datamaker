@@ -46,7 +46,7 @@ way = search
 |----------|------|------|
 | INCR_INT | 自增int  | from  : 从from开始自增，步长1
 | RAND_INT | 随机int  | from,to  : 生成[from,to]闭区间整数
-| RAND_FLOAT | 随机int  | from,to,round  : 生成[from,to]闭区间浮点，保留round位小数，这三个参数都是整数
+| RAND_FLOAT | 随机浮点  | from,to,round  : 生成[from,to]闭区间浮点，保留round位小数，这三个参数都是整数
 | INCR_DAY | 日期自增     | from  : 从from开始自增，步长1天，格式20180304
 | INCR\_DAY\_GROUPLY | 日期自增（组模式） | 同上，但每组值里的这个日期不变，下条SQL才变
 | RAND_TIMESTAMP |  随机时间戳     | from,to  : 生成[from,to]这些天里的秒级时间戳，如 20180304,20180305
