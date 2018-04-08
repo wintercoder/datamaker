@@ -190,12 +190,14 @@ placeholder='CREATE TABLE `im_feed_reply` (
 
                         var selectStr = `
                                     <select class="form-control selectpicker" id="method_selectpicker_`+i+`" onchange="selectOnChange(this,`+ jsonVal +`)" >
-                                        <optgroup label="整数">
+                                        <optgroup label="数字">
                                             <option value="incr_int" >自增</option>
-                                            <option value="rand_int"  ">随机整数</option>
+                                            <option value="rand_int"  >随机整数</option>
+                                            <option value="rand_float"  >随机浮点</option>
                                             <option value="incr_day" >自增日期</option>
                                             <option value="incr_day_grouply" >自增日期（组自增）</option>
                                             <option value="rand_timestamp" >随机时间戳</option>
+                                            <option value="rand_timestamp_mysql" >随机时间（Mysql格式）</option>
                                             <option value="ignore" >忽略该列</option>
                                         </optgroup>
                                         <optgroup label="字符串">
@@ -204,7 +206,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
                                             <option value="rand_str">随机字符串</option>
                                             <option value="rand_str_list">随机字符串（指定列表）</option>
                                             <option value="incr_str_prefix">前缀 + 数字自增</option>
-                                            <option value="rand_pic_url">随机图片URL</option>
+                                            <option value="rand_pic_url">图片URL</option>
                                         </optgroup>
                                         </select>
                                 `;
@@ -240,12 +242,16 @@ placeholder='CREATE TABLE `im_feed_reply` (
                             return '输入：3 </br> 输出：3，4，5 ...';
                         case 'rand_int':
                             return "输入：1,100</br> 输出：在闭区间 [1,100] 中随机，可重复";
+                        case 'rand_float':
+                            return "输入：1,100,3</br> 输出：在闭区间 [1,100] 中随机浮点数，保留3位小数";
                         case 'incr_day':
                             return "输入：20180401</br> 输出：从 20180401 起日期自增，自动跨月";
                         case 'incr_day_grouply':
                             return "输入：20180401，2条SQL，3值合一组</br> 输出： <br />20180401,20180401,20180401<br />20180402,20180402,20180402<br /> 适合与常量列表组成叉积模式，生成每个子店铺每天各一个值";
                         case 'rand_timestamp':
                             return "输入：20180401,20180402</br> 输出：从 20180401 到 20180402 这两天里的随机时间戳";
+                        case 'rand_timestamp_mysql':
+                            return "输入：20180401,20180402</br> 输出：这两天里的随机时间  <br /> 格式： 2018-04-01 11:16:16";
                         case 'ignore':
                             return "不解释";
                         case 'const_str':
@@ -276,6 +282,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
                             optionTxt.value = 1;
                             break;
                         case 'rand_int':
+                        case 'rand_float':
                             optionTxt.value = '1,100';
                             break;
                         case 'incr_day':
@@ -287,6 +294,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
                             optionTxt.placeholder = '不生成该列，适合自增列';
                             break;
                         case 'rand_timestamp':
+                        case 'rand_timestamp_mysql':
                             optionTxt.value = '20180401,20180404';
                             break;
                         case 'const_str':
