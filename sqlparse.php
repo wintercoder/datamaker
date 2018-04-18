@@ -30,13 +30,89 @@ class CreateSqlParser
         return $ret;
     }
 
+    /**
+     * 解析字段名没有 ` 的SQL，正则以空格为分隔符，常见软件： datagrip
+     * 正则匹配规则： 若干空格 + 不含空格的字符串(字段名) + 空格 + 不含空格的字符串(类型) + 空格 + 包含换行的任意字符（额外信息） + 逗号或者）[其中右括号结尾是表里没有任何索引的情况]，支持跨行匹配
+     * @param $sql
+            CREATE TABLE t_supplier_product
+            (
+                id INT AUTO_INCREMENT
+                PRIMARY KEY,
+                supplier_id INT NOT NULL
+                COMMENT '供应商id',
+                product_detail_id INT NOT NULL
+                COMMENT '单品id',
+                price DOUBLE NOT NULL
+                COMMENT '采购价',
+                KEY (`supplier_id`)
+            )
+            COMMENT '供应商货品'
+            ENGINE = InnoDB
+            CHARSET = utf8;
+     * @return  array
+     * match[1]: 很多空格或者 UNIQUE KEY 、 KEY 这种无用字段，用于排除索引部分
+     * match[2]: 字段名
+     * match[3]: 类型，包含可选的长度 int(11) 、text
+     * match[4]: 其他，NOT NULL AUTO_INCREMENT COMMENT '我是注释' 这种
+     */
+    private function parseWithoutBackQuote($sql){
+        $content = explode('(',$sql,2); //先拿到 create table 之后的避免 正则把 第一列 吃了
+        $sql = $content[1];
+        $pattern = "#( *)([^\s]+) ([^\s]+) ([\s\S]+?)[,)]#im";
+        preg_match_all($pattern, $sql, $matches);
+        for ($cnt = 0; $cnt < count($matches[0]); $cnt++) {
+            if (false !== stripos($matches[3][$cnt], 'KEY')) { //索引 排除
+                unset($matches[0][$cnt], $matches[1][$cnt],$matches[2][$cnt]);
+                unset($matches[3][$cnt], $matches[4][$cnt]);
+            }
+        }
+        return $matches;
+    }
+
+
+    /**
+     * 解析字段名有 ` 包含的SQL，常见软件：Navicat
+     * 正则匹配规则： 任意字符若干（空格或KEY） + `列名`+ 空格 + 非空字符串（类型） + 空格 + 额外信息 + 逗号或者），其中右括号结尾是表里没有任何索引的情况，支持跨行匹配
+     * 如果需要改动，需要注意： COMMENT 换行、 表无索引时最后个字段的情况，目前以 ` 来区分字段而非空格
+     * @param $sql
+        CREATE TABLE `im_feed` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `parent_id` int(11) NOT NULL DEFAULT '0',
+            `user_id` bigint(11) NOT NULL DEFAULT '0' COMMENT '学号或者老师工号',
+            `content` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
+            `is_deleted` tinyint(4) NOT NULL DEFAULT '0',
+            `photos` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
+            `create_time` int(11) NOT NULL DEFAULT '0',
+            PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+     * @return mixed
+     * match[1]: 很多空格或者 UNIQUE KEY 、 KEY 这种无用字段，用于排除索引部分
+     * match[2]: 字段名
+     * match[3]: 类型，包含可选的长度 int(11) 、text
+     * match[4]: 其他，NOT NULL AUTO_INCREMENT COMMENT '我是注释' 这种
+     */
+    private function parseWithBackQuote($sql){
+        $pattern = "#(.*)`(.+)` ([^\s]+) ([\s\S]+?)[,)]#im";
+        preg_match_all($pattern, $sql, $matches);
+        for ($cnt = 0; $cnt < count($matches[0]); $cnt++) {
+            if (false !== stripos($matches[1][$cnt], 'KEY')) { //索引 排除
+                unset($matches[0][$cnt], $matches[1][$cnt],$matches[2][$cnt]);
+                unset($matches[3][$cnt], $matches[4][$cnt]);
+            }
+        }
+        return $matches;
+    }
+
     public function execute($input)
     {
         $sql = $input;
         $ret = [];
 
-        //解析表名
-        $pattern = "#CREATE TABLE `(.+)` #i";
+        //解析表名，兼容以下两种，返回的表名带不带 `都可以成功插入
+        //  CREATE TABLE `test` (
+        //  CREATE TABLE t_supplier_product
+        //  (
+        $pattern = "#CREATE TABLE (.+?)[\s]#i";
         preg_match($pattern, $sql, $matches);
         if (empty($matches)) {
             return $this->getApiReturn(self::errorParseError, '不是建表SQL，未包含 CREATE TABLE', []);
@@ -44,13 +120,16 @@ class CreateSqlParser
         $ret['table_name'] = $matches[1];
 
         //解析字段，推荐个在线正则网站 https://regexr.com/
-        $pattern = "#(.+)`(.+)` ([^\s]+)(.+),#i";
-        preg_match_all($pattern, $sql, $matches);
+        $matches = $this->parseWithBackQuote($sql);     //带`的解析失败则用不带`的解析，大部分SQL是带`的
+        if (empty($matches[0])) {
+            $matches = $this->parseWithoutBackQuote($sql);
+        }
         $ret['list'] = [];
         if (empty($matches[0])) {
             return $this->getApiReturn(self::errorParseError, '未查找到SQL字段', []);
         }
-//                echo json_encode($matches); exit();
+//        echo json_encode($matches); exit();
+
 
         //解析后拿到
         // match[1]: 很多空格或者 UNIQUE KEY 、 KEY 这种无用字段，用于排除索引部分
@@ -58,9 +137,6 @@ class CreateSqlParser
         // match[3]: 类型，包含可选的长度 int(11) 、text
         // match[4]: 其他，NOT NULL AUTO_INCREMENT COMMENT '我是注释' 这种
         for ($cnt = 0; $cnt < count($matches[0]); $cnt++) {
-            if( false !== stripos($matches[1][$cnt], 'KEY' ) ){ //索引 排除
-                continue;
-            }
             $key = $matches[2][$cnt];
             $type = $matches[3][$cnt];
             $size = 0;
@@ -146,14 +222,14 @@ class CreateSqlParser
             default:
                 $item = [
                     'method' => self::CONST_STR,
-                    'value' => '我是常量',
+                    'value' => '1',
                 ];
                 break;
         }
 
         //自增ID
         $autoInc = stripos($others, "AUTO_INCREMENT");
-        if ($autoInc) {
+        if ($autoInc !== false) {
             $item = [
                 'method' => self::IGNORE,
                 'desc' => '自增ID，忽略',
@@ -229,16 +305,35 @@ date_default_timezone_set("Asia/Shanghai");
 
 
 $defaultSql = "
-CREATE TABLE `test` (
+CREATE TABLE `im_feed` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `create_time` int(11) NOT NULL DEFAULT '',
-  `insert_day` int NOT NULL '',
-  `content` text NOT NULL '',
-  `is_deleted` tinyint(2) NOT NULL,
-  `up_count` int(11) NOT NULL,
-  `date_ti` datetime DEFAULT NULL,
+  `parent_id` int(11) NOT NULL DEFAULT '0',
+  `user_id` bigint(11) NOT NULL DEFAULT '0' COMMENT '学号或者老师工号',
+  `content` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `is_deleted` tinyint(4) NOT NULL DEFAULT '0',
+  `photos` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `create_time` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;";
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+";
+
+$defaultSql2 = "
+CREATE TABLE t_supplier_product
+(
+id INT AUTO_INCREMENT
+PRIMARY KEY,
+supplier_id INT NOT NULL
+COMMENT '供应商id',
+product_detail_id INT NOT NULL
+COMMENT '单品id',
+price DOUBLE NOT NULL
+COMMENT '采购价',
+KEY (`supplier_id`)
+)
+COMMENT '供应商货品'
+ENGINE = InnoDB
+CHARSET = utf8;
+";
 
 $sql = $_POST['sql'];
 $parser = new CreateSqlParser();
