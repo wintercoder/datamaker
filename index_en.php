@@ -1,6 +1,6 @@
 <html>
 <head>
-    <title>SQL测试数据生成</title>
+    <title>SQL Data Generator</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -30,7 +30,7 @@
         <div class="col-md-12 column">
             <nav class="navbar navbar-default" role="navigation">
                 <div class="navbar-header" >
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"> <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button> <a class="navbar-brand" href="#">SQL测试数据生成</a>
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"> <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button> <a class="navbar-brand" href="#">SQL Data Generator</a>
                 </div>
 
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -41,7 +41,7 @@
                     </ul>
                     <ul class="nav navbar-nav navbar-left">
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">切换语言<strong class="caret"></strong></a>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Language<strong class="caret"></strong></a>
                             <ul class="dropdown-menu">
                                 <li>
                                     <a  id="btn_to_chinese"  href="./" >中文</a>
@@ -52,15 +52,16 @@
                             </ul>
                         </li>
                     </ul>
+
                     <ul class="nav navbar-nav navbar-right">
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">保存配置<strong class="caret"></strong></a>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Save Config<strong class="caret"></strong></a>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a  id="btn_import"  href="javascript:void(0);" onclick="onImportBtnClick()" >导入配置</a>
+                                    <a  id="btn_import"  href="javascript:void(0);" onclick="onImportBtnClick()" >Import</a>
                                 </li>
                                 <li>
-                                    <a id="btn_export"  href="#">导出配置</a>
+                                    <a id="btn_export"  href="#">Export</a>
                                 </li>
 <!--                                <li class="divider">-->
 <!--                                </li>-->
@@ -83,16 +84,16 @@
 
             <form role="form" >
                 <div class="form-group">
-                    <label>SQL表结构</label>
+                    <label>SQL TABLE STRUCTURE</label>
 <!--                    <label style="font-size:12px" class="label label-info">SQL表结构</label>-->
-                    <span class="help-block"> 从 show create table tablename 获得</span>
+                    <span class="help-block">show create table tablename </span>
                     <textarea id="sql_create" class="form-control" rows="3"
 placeholder='CREATE TABLE `im_feed_reply` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
 ) ENGINE=InnoDB AUTO_INCREMENT=1;
 '></textarea>
                 </div>
-                <button onclick="return false" id="btn_get_default" class="btn btn-default  btn-info">下一步</button>
+                <button onclick="return false" id="btn_get_default" class="btn btn-default  btn-info">Next</button>
 <!--导入导出 已放右上角-->
 <!--                <button onclick="return false" id="btn_export" class="btn btn-default  btn-info">导出</button>-->
 <!--                <button  id="btn_import" onclick="onImportBtnClick()" class="btn btn-default  btn-info">导入</button>-->
@@ -126,9 +127,9 @@ placeholder='CREATE TABLE `im_feed_reply` (
                 <table id="select_table" hidden class="table table-striped" >
                     <thead >
                     <tr >
-                        <th data-field="key">列名</th>
-                        <th data-field="method">生成规则</th>
-                        <th data-field="method_option">参数</th>
+                        <th data-field="key">Column</th>
+                        <th data-field="method">Rule</th>
+                        <th data-field="method_option">Parameter</th>
                     </tr>
                     </thead>
                     <tbody id ="table_tr">
@@ -139,7 +140,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
 <div id="btn_group_gen" hidden>
             <!-- 生成SQL的条数等 -->
             <div class="col-md-4 column" >
-                <button id="btn_commit_sql" type="submit" class="btn btn-info btn-default">生成SQL语句</button>
+                <button id="btn_commit_sql" type="submit" class="btn btn-info btn-default">Generate SQL</button>
             </div>
             <div class="col-md-4 column" >
                 <form class="form-horizontal" role="form">
@@ -147,7 +148,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
                         <div class="col-sm-3">
                             <input type="number" class="form-control" id="tv_count" value="2"/>
                         </div>
-                        <label class="col-3 control-label">条SQL</label>
+                        <label class="col-3 control-label">Lines</label>
                     </div>
                 </form>
             </div>
@@ -158,7 +159,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
                         <div class="col-sm-3">
                             <input type="number" class="form-control" id="tv_group_size" value="3"/>
                         </div>
-                        <label class="col-3 control-label">个值合并成一组SQL</label>
+                        <label class="col-3 control-label">Value merge into one sql</label>
                     </div>
                 </form>
             </div>
@@ -182,7 +183,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
                         },success:function(response,status){
                             fillTabelWithData(response.data);
                         },error:function(data,statsu){
-                            alert("网络获取默认值失败！");
+                            alert("Network fail！");
                         }
                     })
                 }
@@ -203,23 +204,23 @@ placeholder='CREATE TABLE `im_feed_reply` (
 
                         var selectStr = `
                                     <select class="form-control selectpicker" id="method_selectpicker_`+i+`" onchange="selectOnChange(this,`+ jsonVal +`)" >
-                                        <optgroup label="数字">
-                                            <option value="incr_int" >自增</option>
-                                            <option value="rand_int"  >随机整数</option>
-                                            <option value="rand_float"  >随机浮点</option>
-                                            <option value="incr_day" >自增日期</option>
-                                            <option value="incr_day_grouply" >自增日期（组自增）</option>
-                                            <option value="rand_timestamp" >随机时间戳</option>
-                                            <option value="rand_timestamp_mysql" >随机时间（Mysql格式）</option>
-                                            <option value="ignore" >忽略该列</option>
+                                        <optgroup label="Number">
+                                            <option value="incr_int" >Auto Increment</option>
+                                            <option value="rand_int"  >Random Int</option>
+                                            <option value="rand_float"  >Random Float</option>
+                                            <option value="incr_day" >Auto Incr DAY</option>
+                                            <option value="incr_day_grouply" >Auto Incr DAY (Group)</option>
+                                            <option value="rand_timestamp" >Random Timestamp</option>
+                                            <option value="rand_timestamp_mysql" >Random Time (Mysql) </option>
+                                            <option value="ignore" >Ignore </option>
                                         </optgroup>
-                                        <optgroup label="字符串">
-                                            <option value="const_str" >常量</option>
-                                            <option value="const_str_list" >常量列表（组模式）</option>
-                                            <option value="rand_str">随机字符串</option>
-                                            <option value="rand_str_list">随机字符串（指定列表）</option>
-                                            <option value="incr_str_prefix">前缀 + 数字自增</option>
-                                            <option value="rand_pic_url">图片URL</option>
+                                        <optgroup label="String">
+                                            <option value="const_str" >Const</option>
+                                            <option value="const_str_list" >Const List (Group)</option>
+                                            <option value="rand_str">Random String</option>
+                                            <option value="rand_str_list">Random String In List</option>
+                                            <option value="incr_str_prefix">Prefix + Number (Incr)</option>
+                                            <option value="rand_pic_url">Picture URL</option>
                                         </optgroup>
                                         </select>
                                 `;
@@ -252,33 +253,33 @@ placeholder='CREATE TABLE `im_feed_reply` (
 
                     switch (method) {
                         case 'incr_int':
-                            return '输入：3 </br> 输出：3，4，5 ...';
+                            return 'Input: 3 </br> Output: 3,4,5 ...';
                         case 'rand_int':
-                            return "输入：1,100</br> 输出：在闭区间 [1,100] 中随机，可重复";
+                            return "Input: 1,100</br> Output: Random in interval [1,100] ";
                         case 'rand_float':
-                            return "输入：1,100,3</br> 输出：在闭区间 [1,100] 中随机浮点数，保留3位小数";
+                            return "Input: 1,100,3</br> Output: Random in interval [1,100], retains 3 digits after the decimal point";
                         case 'incr_day':
-                            return "输入：20180401</br> 输出：从 20180401 起日期自增，自动跨月";
+                            return "Input: 20180429</br> Output:  20180429,20180430,20180501 ...";
                         case 'incr_day_grouply':
-                            return "输入：20180401，2条SQL，3值合一组</br> 输出： <br />20180401,20180401,20180401<br />20180402,20180402,20180402<br /> 适合与常量列表组成叉积模式，生成每个子店铺每天各一个值";
+                            return "Input: </br>20180401;</br>   SQL line:2; </br>   Group with 3 value</br> Output:  <br />20180401,20180401,20180401<br />20180402,20180402,20180402<br />   Good for Every Shop/day Mode";
                         case 'rand_timestamp':
-                            return "输入：20180401,20180402</br> 输出：从 20180401 到 20180402 这两天里的随机时间戳";
+                            return "Input: 20180401,20180402</br> Output: Timestamp between 20180401 and 20180402";
                         case 'rand_timestamp_mysql':
-                            return "输入：20180401,20180402</br> 输出：这两天里的随机时间  <br /> 格式： 2018-04-01 11:16:16";
+                            return "Input: 20180401,20180402</br> Output: Time string with format:  2018-04-01 11:16:16";
                         case 'ignore':
-                            return "不解释";
+                            return "Do not generate this column";
                         case 'const_str':
-                            return "不解释";
+                            return "Const";
                         case 'const_str_list':
-                            return "输入：百度,阿里,腾讯；2条SQL，3值合一组</br> 输出： <br />百度,阿里,腾讯<br />百度,阿里,腾讯<br /> <br /> 按照列表中的元素生成，每个元素按顺序出现，输入元素间用英文逗号分隔。</br> <br /> 有多个常量列表则并行出现，输出SQL以 min(元素个数) 为一组";
+                            return "Input: </br>Google,Facebook,Microsoft; </br> SQL line:2;</br>  Group with 3 value</br> Output:  <br />Google,Facebook,Microsoft<br />Google,Facebook,Microsoft";
                         case 'rand_str':
-                            return '输入：长度</br> 输出：随机字符串，字符集：字母表';
+                            return 'Input: Length of string</br> Output: Random String with alphabet';
                         case 'rand_str_list':
-                            return '输入：摩拜,ofo</br> 输出：列表里随机选，可重复';
+                            return 'Input: Hello,World</br> Output: Hello or World, random';
                         case 'incr_str_prefix':
-                            return '输入：小王</br> 输出：小王1，小王2';
+                            return 'Input: William</br> Output: William1,William2';
                         case 'rand_pic_url':
-                            return '输入：300,400 </br> 输出：宽300，高400的图片地址';
+                            return 'Input: 300,400 </br> Output: URL with widht:300, height:400';
                     }
                 }
 
@@ -289,7 +290,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
                     var parent = obj.parentNode.parentNode;
                     var brother = obj.parentNode.nextSibling;
                     var optionTxt = brother.children[0];    //参数文本框
-                    var incrStrPre = ['老王','射击狮','测试店','产品经理','程序员','码农','攻城狮','SB'];
+                    var incrStrPre = ['William','John','TestShop','Product','SB'];
                     switch (method) {
                         case 'incr_int':
                             optionTxt.value = 1;
@@ -300,27 +301,27 @@ placeholder='CREATE TABLE `im_feed_reply` (
                             break;
                         case 'incr_day':
                         case 'incr_day_grouply':
-                            optionTxt.value = 20180401;
+                            optionTxt.value = 20180429;
                             break;
                         case 'ignore':
                             optionTxt.value = '';
-                            optionTxt.placeholder = '不生成该列，适合自增列';
+                            optionTxt.placeholder = 'ignore this column, good for AUTO_INCREMENT';
                             break;
                         case 'rand_timestamp':
                         case 'rand_timestamp_mysql':
                             optionTxt.value = '20180401,20180404';
                             break;
                         case 'const_str':
-                            optionTxt.value = 'Goolge';
+                            optionTxt.value = 'Google';
                             break;
                         case 'const_str_list':
-                            optionTxt.value = '百度,阿里,腾讯';
+                            optionTxt.value = 'Google,Facebook,Microsoft';
                             break;
                         case 'rand_str':
                             optionTxt.value = '5';
                             break;
                         case 'rand_str_list':
-                            optionTxt.value = '摩拜,ofo,小蓝,悟空,7号电单车';
+                            optionTxt.value = 'Google,Facebook,Microsoft,Apple';
                             break;
                         case 'incr_str_prefix':
                             optionTxt.value = incrStrPre[ Math.floor((incrStrPre.length-1) * Math.random()) ] ;
@@ -440,7 +441,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
             <br/><br/><br/><br/>
                 <!-- SQL结果 -->
                 <div hidden id ="tv_group_result" class="col-md-12  column">
-                    <textarea  id="sql_result" class="form-control" placeholder="我是存放 SQL 结果的地方" rows="8" ></textarea>
+                    <textarea  id="sql_result" class="form-control" placeholder="I show result" rows="8" ></textarea>
                 </div>
 
         </div>

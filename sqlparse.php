@@ -169,7 +169,8 @@ class CreateSqlParser
     {
         $item = [];
         $type = trim($type);
-        $incrStrPre = ['老王', '射击狮', '测试店', '产品经理', '程序员', '码农', '攻城狮', 'SB'];
+//        $incrStrPre = ['老王', '射击狮', '测试店', '产品经理', '程序员', '码农', '攻城狮', 'SB'];
+        $incrStrPre = ['Boss', 'Player', 'Test', 'PM', 'Programmer', 'Worker', 'Actor', 'SB'];
 
         switch ($type) {
             case 'varchar':
