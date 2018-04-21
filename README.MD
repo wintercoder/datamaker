@@ -2,6 +2,7 @@
 
 根据SQL表结构生成Mysql测试数据，根据字段名猜测类型，生成默认值  
 
+[English Readme](./README_EN.MD)
 
 ## 生成规则
 
