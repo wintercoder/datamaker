@@ -158,7 +158,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
                         <div class="col-sm-3">
                             <input type="number" class="form-control" id="tv_group_size" value="3"/>
                         </div>
-                        <label class="col-3 control-label">个值合并成一组SQL</label>
+                        <label class="col-3 control-label">行记录合并成一组SQL</label>
                     </div>
                 </form>
             </div>
