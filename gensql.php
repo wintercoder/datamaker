@@ -283,9 +283,10 @@ class WorkHandler{
         }
         $inputList = array_values($inputList);  //从0开始 重建下标
 
-        $genCount = $input['count'];
-        $tableName = $input['table_name'];
+        $genCount = !empty($input['count']) ? $input['count'] : 5 ;
+        $tableName = !empty($input['table_name']) ? $input['table_name'] : 'test';
         $groupSize = $input['group_size'];              //每个SQL有多少value组
+        $insertWay = !empty($input['insert_way']) ? $input['insert_way'] : 'INSERT INTO ';
 
         $keyArr = array_column($inputList,'key');
 
@@ -315,7 +316,7 @@ class WorkHandler{
             }
             $valueStr = rtrim($valueStr,',');
             $valueStr .= ';';
-            $sql .= "INSERT INTO {$tableName} (" . implode(",",$keyArr) .") VALUES $valueStr";
+            $sql .= $insertWay . "{$tableName} (" . implode(",",$keyArr) .") VALUES $valueStr";
             $sql .= "\n";
             $sql .= "\n";
         }

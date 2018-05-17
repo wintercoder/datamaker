@@ -16,7 +16,13 @@
 
 **Unique Key**  
 
-暂不支持该模式，但 `UNIQUE KEY (user_id,platform) ` 这种platform只有1和2的可以考虑使用 给 `platform` 选 `常量列表（组模式）` 填 `1,2`，然后user_id选自增之类保证不重就能实现效果了。
+有 `UNIQUE KEY (user_id,platform) ` 的情况  
+
+方案一：  
+这种platform只有1和2的可以考虑使用 给 `platform` 选 `常量列表（组模式）` 填 `1,2`，然后user_id选自增之类保证不重就OK。 
+
+方案二：  
+选择重复Key选项，测试数据一般跳过就好，注意选 `REPLACE INTO` 可能出现 `AUTO_INCREMENT` + 2 的情况
 
 ## 个性化
 你可以通过部署到自己的服务器上，对一些字段进行默认值配置，非常**适合公司内网**  

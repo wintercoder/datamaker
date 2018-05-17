@@ -137,33 +137,46 @@ placeholder='CREATE TABLE `im_feed_reply` (
                     </tbody>
                 </table>
 
-<div id="btn_group_gen" hidden>
-            <!-- 生成SQL的条数等 -->
-            <div class="col-md-4 column" >
-                <button id="btn_commit_sql" type="submit" class="btn btn-info btn-default">Generate SQL</button>
-            </div>
-            <div class="col-md-4 column" >
-                <form class="form-horizontal" role="form">
-                    <div class="form-group">
-                        <div class="col-sm-3">
-                            <input type="number" class="form-control" id="tv_count" value="2"/>
+            <div id="btn_group_gen" hidden>
+                <!-- 生成SQL的条数等 -->
+                <div class="col-md-1 column" >
+                    <button id="btn_commit_sql" type="submit" class="btn btn-info btn-default">Generate</button>
+                </div>
+                <div class="col-md-4 column" >
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <div class="col-sm-3">
+                                <input type="number" class="form-control" id="tv_count" value="2"/>
+                            </div>
+                            <label class="col-3 control-label">Statement</label>
                         </div>
-                        <label class="col-3 control-label">Lines</label>
-                    </div>
-                </form>
+                    </form>
+                </div>
+
+                <div class="col-md-4 column">
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <div class="col-sm-3">
+                                <input type="number" class="form-control" id="tv_group_size" value="3"/>
+                            </div>
+                            <label class="col-2 control-label">Records merge into one</label>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="col-md-3 column ">
+                    <form class="form-horizontal form-inline" role="form">
+                        <label class="form-label ">Duplicate Key</label>
+                        <select class="form-horizontal form-control  col-xs-12 selectpicker" id="selectpicker_insertway"  >
+                            <option value="INSERT INTO ">Do Nothing</option>
+                            <option value="INSERT IGNORE ">Ignore</option>
+                            <option value="REPLACE INTO ">Replace</option>
+                        </select>
+                    </form>
+                </div>
+
             </div>
 
-            <div class="col-md-4 column">
-                <form class="form-horizontal" role="form">
-                    <div class="form-group">
-                        <div class="col-sm-3">
-                            <input type="number" class="form-control" id="tv_group_size" value="3"/>
-                        </div>
-                        <label class="col-3 control-label">Value merge into one sql</label>
-                    </div>
-                </form>
-            </div>
-</div>
             <input type="text" id="tv_tablename_hidden" value="我是表名" style="display:none" >  <!--  存放表名的隐藏字段-->
 
             <script type="text/javascript">
@@ -400,6 +413,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
                             fieldList.push(item);
                         });
 
+                        params['insert_way'] = $('#selectpicker_insertway').val();
                         params['list'] = fieldList;
                         params['group_size'] = $('#tv_group_size').val();
                         params['group_size'] = params['group_size'] > 500 ? 500 : params['group_size'] ;
