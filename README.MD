@@ -43,7 +43,7 @@ value = 20180301
 way = match
 [1]
 key = url 				
-method = RAND_PIC_LIST 
+method = RAND_PIC_URL 
 value = 300,400			
 way = search				
 ```
@@ -61,14 +61,14 @@ way = search
 | INCR_DAY | 日期自增     | from  : 从from开始自增，步长1天，格式20180304
 | INCR\_DAY\_GROUPLY | 日期自增（组模式） | 同上，但每组值里的这个日期不变，下条SQL才变
 | RAND_TIMESTAMP |  随机时间戳     | from,to  : 生成[from,to]这些天里的秒级时间戳，如 20180304,20180305
-| RAND_TIMESTAMP_MYSQL |  随机时间（Mysql格式）     | from,to  : 生成[from,to]这些天里的秒级时间，格式：2018-04-07 18:08:34
+| RAND\_TIMESTAMP\_MYSQL |  随机时间（Mysql格式）     | from,to  : 生成[from,to]这些天里的秒级时间，格式：2018-04-07 18:08:34
 | IGNORE |   不生成该列    | 
 | CONST_STR |   常量    | 常量值
 | CONST\_STR\_LIST |   常量列表（组模式）    | 输入 a,b，每条SQL都输出 a,b，此时组数固定
 | RAND_STR |   随机串    | length : 英文串长度
 | RAND\_STR\_LIST |   随机串（指定列表）    | a,b,c : 该字段只出现a,b,c之一，可重复出现
 | INCR\_STR\_SUFFIX  |   前缀+自增数字    | 输入 小王，输出 小王1，小王2，用于人名等
-| RAND\_PIC\_LIST |   图片地址    | width,height  : 图片的宽高
+| RAND\_PIC\_URL |   图片地址    | width,height  : 图片的宽高
 
 
 
