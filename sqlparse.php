@@ -17,7 +17,7 @@ class CreateSqlParser
     const RAND_STR_LIST = 'rand_str_list';
     const CONST_STR = 'const_str';
     const CONST_STR_LIST = 'const_str_list';
-    const RAND_PIC_LIST = 'rand_pic_url';
+    const RAND_PIC_URL = 'rand_pic_url';
 
 
     const errorParseError = 1001;
@@ -49,24 +49,31 @@ class CreateSqlParser
             COMMENT '供应商货品'
             ENGINE = InnoDB
             CHARSET = utf8;
-     * @return  array
-     * match[1]: 很多空格或者 UNIQUE KEY 、 KEY 这种无用字段，用于排除索引部分
-     * match[2]: 字段名
-     * match[3]: 类型，包含可选的长度 int(11) 、text
-     * match[4]: 其他，NOT NULL AUTO_INCREMENT COMMENT '我是注释' 这种
+     * @return array 每个元素包含如下字段
+     * origin: 原SQL
+     * key: 字段名
+     * type: 类型，包含可选的长度 int(11) 、text
+     * others:  其他，NOT NULL AUTO_INCREMENT COMMENT '我是注释' 这种
      */
     private function parseWithoutBackQuote($sql){
         $content = explode('(',$sql,2); //先拿到 create table 之后的避免 正则把 第一列 吃了
         $sql = $content[1];
         $pattern = "#( *)([^\s]+) ([^\s]+) ([\s\S]+?)[,)]#im";
         preg_match_all($pattern, $sql, $matches);
+        $ret = [];
         for ($cnt = 0; $cnt < count($matches[0]); $cnt++) {
             if (false !== stripos($matches[3][$cnt], 'KEY')) { //索引 排除
-                unset($matches[0][$cnt], $matches[1][$cnt],$matches[2][$cnt]);
-                unset($matches[3][$cnt], $matches[4][$cnt]);
+                continue;
             }
+            $item = [
+                'origin' => $matches[0][$cnt],
+                'key' => $matches[2][$cnt],
+                'type' => $matches[3][$cnt],
+                'others' => $matches[4][$cnt],
+            ];
+            $ret []= $item;
         }
-        return $matches;
+        return $ret;
     }
 
 
@@ -85,22 +92,30 @@ class CreateSqlParser
             `create_time` int(11) NOT NULL DEFAULT '0',
             PRIMARY KEY (`id`)
         ) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-     * @return mixed
-     * match[1]: 很多空格或者 UNIQUE KEY 、 KEY 这种无用字段，用于排除索引部分
-     * match[2]: 字段名
-     * match[3]: 类型，包含可选的长度 int(11) 、text
-     * match[4]: 其他，NOT NULL AUTO_INCREMENT COMMENT '我是注释' 这种
+     * @return array 每个元素包含如下字段
+     * origin: 原SQL
+     * key: 字段名
+     * type: 类型，包含可选的长度 int(11) 、text
+     * others:  其他，NOT NULL AUTO_INCREMENT COMMENT '我是注释' 这种
      */
     private function parseWithBackQuote($sql){
         $pattern = "#(.*)`(.+)` ([^\s]+) ([\s\S]+?)[,)]#im";
         preg_match_all($pattern, $sql, $matches);
+        $ret = [];
         for ($cnt = 0; $cnt < count($matches[0]); $cnt++) {
             if (false !== stripos($matches[1][$cnt], 'KEY')) { //索引 排除
-                unset($matches[0][$cnt], $matches[1][$cnt],$matches[2][$cnt]);
-                unset($matches[3][$cnt], $matches[4][$cnt]);
+                continue;
             }
+
+            $item = [
+                'origin' => $matches[0][$cnt],
+                'key' => $matches[2][$cnt],
+                'type' => $matches[3][$cnt],
+                'others' => $matches[4][$cnt],
+            ];
+            $ret []= $item;
         }
-        return $matches;
+        return $ret;
     }
 
     public function execute($input)
@@ -120,38 +135,36 @@ class CreateSqlParser
         $ret['table_name'] = $matches[1];
 
         //解析字段，推荐个在线正则网站 https://regexr.com/
-        $matches = $this->parseWithBackQuote($sql);     //带`的解析失败则用不带`的解析，大部分SQL是带`的
-        if (empty($matches[0])) {
-            $matches = $this->parseWithoutBackQuote($sql);
+        $matchList = $this->parseWithBackQuote($sql);     //带`的解析失败则用不带`的解析，大部分SQL是带`的
+        if (empty($matchList)) {
+            $matchList = $this->parseWithoutBackQuote($sql);
         }
         $ret['list'] = [];
-        if (empty($matches[0])) {
+        if (empty($matchList)) {
             return $this->getApiReturn(self::errorParseError, '未查找到SQL字段', []);
         }
-//        echo json_encode($matches); exit();
 
+//        echo json_encode($matchList); exit();
 
-        //解析后拿到
-        // match[1]: 很多空格或者 UNIQUE KEY 、 KEY 这种无用字段，用于排除索引部分
-        // match[2]: 字段名
-        // match[3]: 类型，包含可选的长度 int(11) 、text
-        // match[4]: 其他，NOT NULL AUTO_INCREMENT COMMENT '我是注释' 这种
-        for ($cnt = 0; $cnt < count($matches[0]); $cnt++) {
-            $key = $matches[2][$cnt];
-            $type = $matches[3][$cnt];
+//        解析后拿到的每个item:
+//              "origin":" `baoguang_pv` int(11) NOT NULL DEFAULT '0' COMMENT '昨日曝光pv',",
+//              "key":"baoguang_pv",     ======= 字段名
+//              "type":"bigint(20)",     ======= 类型，包含可选的长度 int(11) 、text
+//              "others":"NOT NULL DEFAULT '0' COMMENT '昨日曝光pv'"  =======  其他，NOT NULL AUTO_INCREMENT COMMENT '我是注释' 这种
+        foreach ($matchList as $item){
             $size = 0;
-
-            $sizeArr = explode('(',$matches[3][$cnt]);
+            $type = $item['type'];
+            $sizeArr = explode('(',$item['type']);
             //如果有()说明是有数字的那种
             if(!empty($sizeArr)) {
                 $type = $sizeArr[0];
                 $size = explode( ")" ,$sizeArr[1]  )[0] ;
             }
-
-            $item = $this->genDefaultAttribute($key, $type , $size, $matches[4][$cnt]);
-            $item['key'] = $key;
-            $ret['list'] [] = $item;
+            $entry = $this->genDefaultAttribute($item['key'], $type , $size, $item['others']);
+            $entry['key'] = $item['key'];
+            $ret['list'] [] = $entry;
         }
+
         $ret['group_size'] = 5;     //组大小
         $ret['count'] = 3;          //多少条SQL
 
@@ -167,9 +180,7 @@ class CreateSqlParser
      */
     private function genDefaultAttribute($key, $type, $size, $others)
     {
-        $item = [];
-        $type = trim($type);
-//        $incrStrPre = ['老王', '射击狮', '测试店', '产品经理', '程序员', '码农', '攻城狮', 'SB'];
+        $type = strtolower(trim($type));
         $incrStrPre = ['Boss', 'Player', 'Test', 'PM', 'Programmer', 'Worker', 'Actor', 'SB'];
 
         switch ($type) {
@@ -261,7 +272,7 @@ class CreateSqlParser
      * 解析ini文件拿到自定义默认值，根据字段名猜测用户想要的是哪个类型，配置文件样例如下，目前只支持 模糊查找 和 精确匹配
             [0]
             key = avatar
-            method = RAND_PIC_LIST
+            method = RAND_PIC_URL
             value = 300,400
             way = search  跟key的匹配方式，search为模糊搜索，输入key包含 avatar 就走这个匹配
 
