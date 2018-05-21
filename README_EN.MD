@@ -70,14 +70,14 @@ way = search
 | INCR_DAY | increment day    | `from`  : increase from `from` with format 20180304
 | INCR\_DAY\_GROUPLY | increment day (grouply same) | same as above，but the value is same in the same group 
 | RAND_TIMESTAMP |  random timestamp | `from,to`  : timestamp in day `[from,to]`, input format is 20180304,20180305
-| RAND_TIMESTAMP_MYSQL |  random time (Mysql)     | `from,to`  : same as above，but the result format is 2018-04-07 18:08:34
+| RAND\_TIMESTAMP\_MYSQL |  random time (Mysql)     | `from,to`  : same as above，but the result format is 2018-04-07 18:08:34
 | IGNORE |   ignore this column    | 
 | CONST_STR |   const value    | 
 | CONST\_STR\_LIST |   const (group list) | `a,b`: every group in sql will output `a,b` 
 | RAND_STR |   random string    | `length` : the length of string with alphabet
 | RAND\_STR\_LIST |   random string in list    | `a,b,c` : random pick one in `a,b,c` 
 | INCR\_STR\_SUFFIX  |  Prefix + Number (Incr) | `test` : it will ouput test1,test2,test3 ...
-| RAND\_PIC\_LIST |  picture url  | `width,height`  : the width and height of url
+| RAND\_PIC\_URL |  picture url  | `width,height`  : the width and height of url
 
 
 
