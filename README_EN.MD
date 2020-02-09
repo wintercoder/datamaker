@@ -79,6 +79,20 @@ way = search
 | INCR\_STR\_SUFFIX  |  Prefix + Number (Incr) | `test` : it will ouput test1,test2,test3 ...
 | RAND\_PIC\_URL |  picture url  | `width,height`  : the width and height of url
 
+## How to add new generator
+
+When you add a method call `rand_what`
+
+1. Frontend: `index.php`
+
+	`getDefaultValueByMethod()` add the default value  
+	`getHoverContent()` add the hover content  
+	`fillTabelWithData()` modify it  
+
+2. Backend`gensql.php`  
+	
+	Add the function call `randWhat()` In class `ValueGenerator` ( Camel-Case of `rand_what` )
+
 
 
 ## License

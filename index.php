@@ -147,7 +147,6 @@ placeholder='CREATE TABLE `im_feed_reply` (
             <!-- 配置 -->
             <div id="btn_group_gen" hidden>
                 <!-- 生成SQL的条数等 -->
-
                 <div class="col-md-2 column" >
                     <button id="btn_commit_sql" type="submit" class="btn btn-info btn-default">生成SQL语句</button>
                     <input type="checkbox" name="cb_is_download" value="is_download" /> 下载
@@ -413,7 +412,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
                         }
 
                         var tablename = $('#tv_tablename_hidden').val();
-                        params['table_name'] = (tablename == '') ? 'table_name' : tablename;
+                        params['table_name'] = (tablename == '' || tablename == 'undefined') ? 'table_name' : tablename;
 
 
                         //发JSON，生成SQL

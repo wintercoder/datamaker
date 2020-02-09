@@ -409,7 +409,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
                             return;
                         }
                         var tablename = $('#tv_tablename_hidden').val();
-                        params['table_name'] = (tablename == '') ? 'table_name' : tablename;
+                        params['table_name'] = (tablename == '' || tablename == 'undefined') ? 'table_name' : tablename;
 
 
                         //发JSON，生成SQL
