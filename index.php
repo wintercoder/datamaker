@@ -4,23 +4,20 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
     <link rel="stylesheet" href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.1/bootstrap-table.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.1/bootstrap-table.min.js"></script>
+    <link href="https://cdn.bootcss.com/bootstrap-table/1.12.1/bootstrap-table.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/bootstrap-table/1.12.1/bootstrap-table.min.js"></script>
     <!--    下拉列表 1.3有BUG，选2.0版本 -->
-<!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/2.0.0-beta1/css/bootstrap-select.min.css" rel="stylesheet" />-->
-<!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.0-beta/css/bootstrap-select.min.css" rel="stylesheet">-->
-<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.0-beta/js/bootstrap-select.min.js"></script>-->
+<!--    <link href="https://cdn.bootcss.com/bootstrap-select/2.0.0-beta1/css/bootstrap-select.min.css" rel="stylesheet" />-->
+<!--    <link href="https://cdn.bootcss.com/bootstrap-select/1.13.0-beta/css/bootstrap-select.min.css" rel="stylesheet">-->
+<!--    <script src="https://cdn.bootcss.com/bootstrap-select/1.13.0-beta/js/bootstrap-select.min.js"></script>-->
 
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/2.0.0-beta1/css/bootstrap-select.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/2.0.0-beta1/js/bootstrap-select.min.js"></script>
+    <link href="https://cdn.bootcss.com/bootstrap-select/2.0.0-beta1/css/bootstrap-select.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/bootstrap-select/2.0.0-beta1/js/bootstrap-select.min.js"></script>
     <link rel="shortcut icon" href="./favicon.png">
-
-
-
 
 
 </head>
@@ -119,7 +116,15 @@ placeholder='CREATE TABLE `im_feed_reply` (
                         var jsonObj = JSON.parse(fileContent);
                         console.log("上传内容：");
                         console.log(jsonObj);
-                        fillTabelWithData(jsonObj);
+                            //这几行关键，否则导入后可能不展示
+                        fillTabelWithData(jsonObj,true);
+
+
+                        showTime = 400;
+                        $('#select_table').show(showTime);
+                        $('#btn_group_gen').show(showTime);
+                        $('#tv_group_result').show(showTime);
+
                     };
                     fileReader.readAsText(this.files[0],'utf8');
                 });
@@ -145,6 +150,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
 
                 <div class="col-md-2 column" >
                     <button id="btn_commit_sql" type="submit" class="btn btn-info btn-default">生成SQL语句</button>
+                    <input type="checkbox" name="cb_is_download" value="is_download" /> 下载
                 </div>
                 <div class="col-md-4 column" >
                     <form class="form-horizontal" role="form">
@@ -199,14 +205,14 @@ placeholder='CREATE TABLE `im_feed_reply` (
                         data:{
                             sql: $('#sql_create').val() //输入的SQL表结构字符串
                         },success:function(response,status){
-                            fillTabelWithData(response.data);
+                            fillTabelWithData(response.data,false);
                         },error:function(data,statsu){
                             alert("网络获取默认值失败！");
                         }
                     })
                 }
                 //根据数据填充表格，用于默认值和导入，参数样例： {"list":[{"key":"id","method":"ignore","value":""},{"key":"parent_id","method":"rand_int","value":"1,100"}]}
-                function fillTabelWithData(responseData) {
+                function fillTabelWithData(responseData,isImport) {
                     $('#tv_tablename_hidden').val(responseData.table_name);   //隐藏框 存放表名
 
                     $('#table_tr').html('');
@@ -214,7 +220,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
                     $.each(responseData.list,function(i,val){
                         str = '';
                         str = str + '<tr id=item_' + i +'>';
-                        str = str + '<td> '+ '<input type="text" class="form-control" id="name" value='+val.key +'></td>';
+                        str = str + '<td> '+ '<input type="text" class="form-control" id="name_' + i +'" value='+val.key +'></td>';
 
                         //无法直接传对象当参数 ，也不能直接json字符串，否则跟onchange的双引号乱套，需要转码
                         var jsonVal = JSON.stringify(val);
@@ -255,8 +261,12 @@ placeholder='CREATE TABLE `im_feed_reply` (
                         $('#method_selectpicker_'+i).selectpicker('refresh');
                         $('#method_selectpicker_'+i).trigger('change');  //手动触发change事件
 
+
+
                         //设置接口返回的默认值 和 对应hover
-                        $("#tv_input_"+i).val( val.value );
+                        if(isImport){
+                            $("#tv_input_"+i).val( val.value );  //导入时才修改
+                        }
                         $("#tv_input_"+i).attr('data-content',getHoverContent( val.method ));
                     });
 
@@ -308,46 +318,9 @@ placeholder='CREATE TABLE `im_feed_reply` (
                     var parent = obj.parentNode.parentNode;
                     var brother = obj.parentNode.nextSibling;
                     var optionTxt = brother.children[0];    //参数文本框
-                    var incrStrPre = ['老王','射击狮','测试店','产品经理','程序员','码农','攻城狮','SB'];
-                    switch (method) {
-                        case 'incr_int':
-                            optionTxt.value = 1;
-                            break;
-                        case 'rand_int':
-                        case 'rand_float':
-                            optionTxt.value = '1,100';
-                            break;
-                        case 'incr_day':
-                        case 'incr_day_grouply':
-                            optionTxt.value = 20180401;
-                            break;
-                        case 'ignore':
-                            optionTxt.value = '';
-                            optionTxt.placeholder = '不生成该列，适合自增列';
-                            break;
-                        case 'rand_timestamp':
-                        case 'rand_timestamp_mysql':
-                            optionTxt.value = '20180401,20180404';
-                            break;
-                        case 'const_str':
-                            optionTxt.value = 'Goolge';
-                            break;
-                        case 'const_str_list':
-                            optionTxt.value = '百度,阿里,腾讯';
-                            break;
-                        case 'rand_str':
-                            optionTxt.value = '5';
-                            break;
-                        case 'rand_str_list':
-                            optionTxt.value = '摩拜,ofo,小蓝,悟空,7号电单车';
-                            break;
-                        case 'incr_str_prefix':
-                            optionTxt.value = incrStrPre[ Math.floor((incrStrPre.length-1) * Math.random()) ] ;
-                            break;
-                        case 'rand_pic_url':
-                            optionTxt.value = '300,400';
-                            break;
-                    }
+                    //修改hints
+                    optionTxt.placeholder = getDefaultValueByMethod(method);
+
                     //更换 生成规则 后 更新 hover
                     var currentId = obj.id.split('_')[2];   //当前点击第几行
                     $("#tv_input_"+currentId).attr('data-content',getHoverContent( method ));
@@ -389,6 +362,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
                     });
                     var exportData =  new Object();
                     exportData['list'] = fieldList;
+                    exportData['table_name'] = $('#tv_tablename_hidden').val();
                     exportData = JSON.stringify(exportData);
                     createAndDownloadFile("config_export.txt",exportData);
                 });
@@ -406,14 +380,20 @@ placeholder='CREATE TABLE `im_feed_reply` (
 
                             var key = tdArr.eq(0).find('input').val();     //字段名
                             var method = tdArr.eq(1).find('select').val(); //method
-                            var option = tdArr.eq(2).find('input').val();  //参数
+                            var inputValue = tdArr.eq(2).find('input').val();  //参数
+
+
+                            //什么都不填的时候，调接口的默认值
+                            if(inputValue == null || inputValue == "" || inputValue == 'undefined'){
+                                inputValue = getDefaultValueByMethod(method);
+                            }
 
                             var item = new Object();
                             item['key'] = key;
                             item['method'] = method;
-                            item['value'] = option;
+                            item['value'] = inputValue;
                             if(method == 'const_str_list'){
-                                constListSize = Math.min(constListSize,option.split(',').length);
+                                constListSize = Math.min(constListSize,inputValue.split(',').length);
                             }
                             fieldList.push(item);
                         });
@@ -427,7 +407,11 @@ placeholder='CREATE TABLE `im_feed_reply` (
                         }
 
                         params['count'] = $('#tv_count').val();
-                        params['count'] = params['count'] > 5000 ?  5000 : params['count'];
+                        if(params['count'] > 5000){
+                            $('#sql_result').val('条数超过5000，怕小宽带撑不住，请自行搭建服务');
+                            return;
+                        }
+
                         var tablename = $('#tv_tablename_hidden').val();
                         params['table_name'] = (tablename == '') ? 'table_name' : tablename;
 
@@ -435,10 +419,51 @@ placeholder='CREATE TABLE `im_feed_reply` (
                         //发JSON，生成SQL
                         params = JSON.stringify(params);
                         $.post('gensql.php',params,function(data){
-                            $('#sql_result').val(data);
+                          if( $('input[name="cb_is_download"]:checked').length == 1){   //下载框被选中
+                                $('#sql_result').val('已触发浏览器下载');
+                                createAndDownloadFile('datamaker_' + params['table_name'] + '.sql',data);
+                          }else{
+                                //正常展示
+                                $('#sql_result').val(data);
+                          }
                         });
+
                     });
                 });
+
+
+                function getDefaultValueByMethod(methodParams) {
+                    switch (methodParams) {
+                        case 'incr_int':
+                            return 1;
+                        case 'rand_int':
+                            return '1,100';
+                        case 'rand_float':
+                            return '1,100,2';
+                        case 'incr_day':
+                        case 'incr_day_grouply':
+                            return 20180401;
+                        case 'ignore':
+                            return '不生成该列，适合自增列';
+                        case 'rand_timestamp':
+                        case 'rand_timestamp_mysql':
+                            return '20180401,20180404';
+                        case 'const_str':
+                            return 'Goolge';
+                        case 'const_str_list':
+                            return '百度,阿里,腾讯';
+                        case 'rand_str':
+                            return '5';
+                        case 'rand_str_list':
+                            return '摩拜,ofo,小蓝,悟空,7号电单车';
+                        case 'incr_str_prefix':
+                            // var incrStrPre = ['老王','射击狮','测试店','产品经理','程序员','码农','攻城狮','SB'];
+                            // return incrStrPre[ Math.floor((incrStrPre.length-1) * Math.random()) ] ;
+                            return 'PM-';
+                        case 'rand_pic_url':
+                            return '300,400';
+                    }
+                }
 
 
                 /**
@@ -466,9 +491,15 @@ placeholder='CREATE TABLE `im_feed_reply` (
     </div>
 </div>
 
+ <div style="height: 40px;box-sizing: border-box; position: relative;bottom: 0;  width: 100%; margin-top:20px">
+        <div style="text-align:center;width:100%;height:50;">
+            <p class="copyright text-muted small">Copyright &copy; 小光 2017.  <a href="http://beian.miit.gov.cn/">你的备案号</a></p>
+        </div>
+    </div>
 
 
 
 </body>
+
 </html>
 

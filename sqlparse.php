@@ -127,6 +127,8 @@ class CreateSqlParser
         //  CREATE TABLE `test` (
         //  CREATE TABLE t_supplier_product
         //  (
+        $sql = str_replace("IF NOT EXISTS","",$sql);
+
         $pattern = "#CREATE TABLE (.+?)[\s]#i";
         preg_match($pattern, $sql, $matches);
         if (empty($matches)) {
@@ -155,8 +157,9 @@ class CreateSqlParser
             $size = 0;
             $type = $item['type'];
             $sizeArr = explode('(',$item['type']);
+
             //如果有()说明是有数字的那种
-            if(!empty($sizeArr)) {
+            if(!empty($sizeArr) && count($sizeArr) >= 2 ) {
                 $type = $sizeArr[0];
                 $size = explode( ")" ,$sizeArr[1]  )[0] ;
             }
@@ -250,7 +253,7 @@ class CreateSqlParser
 
         //注释
         $expComment = explode("COMMENT ", $others);
-        if (!empty($expComment)) {
+        if (!empty($expComment) && count($expComment) >= 2 ) {
             $item['comment'] = trim($expComment[1], "',");
         }
 
@@ -347,10 +350,11 @@ ENGINE = InnoDB
 CHARSET = utf8;
 ";
 
-$sql = $_POST['sql'];
 $parser = new CreateSqlParser();
-if(empty($sql)){
+if(empty($_POST['sql'])){
     $sql = $defaultSql;
+}else{
+    $sql = $_POST['sql'];
 }
 $ret = $parser->execute($sql);
 echo json_encode($ret);exit();
