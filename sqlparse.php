@@ -58,13 +58,19 @@ class CreateSqlParser
     private function parseWithoutBackQuote($sql){
         $content = explode('(',$sql,2); //先拿到 create table 之后的避免 正则把 第一列 吃了
         $sql = $content[1];
+
+        //提前删除 INDEX 相关 INDEX cust_id (cust_id) USING BTREE,
+        $sql = preg_replace("# *INDEX.+#","",$sql);
+
         $pattern = "#( *)([^\s]+) ([^\s]+) ([\s\S]+?)[,)]#im";
         preg_match_all($pattern, $sql, $matches);
         $ret = [];
         for ($cnt = 0; $cnt < count($matches[0]); $cnt++) {
-            if (false !== stripos($matches[3][$cnt], 'KEY')) { //索引 排除
+            if ( false !== stripos($matches[3][$cnt], 'KEY')
+                || false !== stripos($matches[2][$cnt], 'KEY')  ) { //排除  PRIMARY KEY (id) 和 KEY (id) ，虽然也可以像上面那样正则替换掉线
                 continue;
             }
+
             $item = [
                 'origin' => $matches[0][$cnt],
                 'key' => $matches[2][$cnt],
@@ -99,8 +105,12 @@ class CreateSqlParser
      * others:  其他，NOT NULL AUTO_INCREMENT COMMENT '我是注释' 这种
      */
     private function parseWithBackQuote($sql){
+       //提前删除 INDEX 相关 INDEX cust_id (cust_id) USING BTREE,
+        $sql = preg_replace("# *INDEX.+#","",$sql);
+
         $pattern = "#(.*)`(.+)` ([^\s]+) ([\s\S]+?)[,)]#im";
         preg_match_all($pattern, $sql, $matches);
+        // echo json_encode($matches);exit();
         $ret = [];
         for ($cnt = 0; $cnt < count($matches[0]); $cnt++) {
             if (false !== stripos($matches[1][$cnt], 'KEY')) { //索引 排除
