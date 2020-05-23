@@ -58,13 +58,19 @@ class CreateSqlParser
     private function parseWithoutBackQuote($sql){
         $content = explode('(',$sql,2); //先拿到 create table 之后的避免 正则把 第一列 吃了
         $sql = $content[1];
+
+        //提前删除 INDEX 相关 INDEX cust_id (cust_id) USING BTREE,
+        $sql = preg_replace("# *INDEX.+#","",$sql);
+
         $pattern = "#( *)([^\s]+) ([^\s]+) ([\s\S]+?)[,)]#im";
         preg_match_all($pattern, $sql, $matches);
         $ret = [];
         for ($cnt = 0; $cnt < count($matches[0]); $cnt++) {
-            if (false !== stripos($matches[3][$cnt], 'KEY')) { //索引 排除
+            if ( false !== stripos($matches[3][$cnt], 'KEY')
+                || false !== stripos($matches[2][$cnt], 'KEY')  ) { //排除  PRIMARY KEY (id) 和 KEY (id) ，虽然也可以像上面那样正则替换掉线
                 continue;
             }
+
             $item = [
                 'origin' => $matches[0][$cnt],
                 'key' => $matches[2][$cnt],
@@ -99,8 +105,12 @@ class CreateSqlParser
      * others:  其他，NOT NULL AUTO_INCREMENT COMMENT '我是注释' 这种
      */
     private function parseWithBackQuote($sql){
+       //提前删除 INDEX 相关 INDEX cust_id (cust_id) USING BTREE,
+        $sql = preg_replace("# *INDEX.+#","",$sql);
+
         $pattern = "#(.*)`(.+)` ([^\s]+) ([\s\S]+?)[,)]#im";
         preg_match_all($pattern, $sql, $matches);
+        // echo json_encode($matches);exit();
         $ret = [];
         for ($cnt = 0; $cnt < count($matches[0]); $cnt++) {
             if (false !== stripos($matches[1][$cnt], 'KEY')) { //索引 排除
@@ -127,6 +137,8 @@ class CreateSqlParser
         //  CREATE TABLE `test` (
         //  CREATE TABLE t_supplier_product
         //  (
+        $sql = str_replace("IF NOT EXISTS","",$sql);
+
         $pattern = "#CREATE TABLE (.+?)[\s]#i";
         preg_match($pattern, $sql, $matches);
         if (empty($matches)) {
@@ -155,8 +167,9 @@ class CreateSqlParser
             $size = 0;
             $type = $item['type'];
             $sizeArr = explode('(',$item['type']);
+
             //如果有()说明是有数字的那种
-            if(!empty($sizeArr)) {
+            if(!empty($sizeArr) && count($sizeArr) >= 2 ) {
                 $type = $sizeArr[0];
                 $size = explode( ")" ,$sizeArr[1]  )[0] ;
             }
@@ -250,7 +263,7 @@ class CreateSqlParser
 
         //注释
         $expComment = explode("COMMENT ", $others);
-        if (!empty($expComment)) {
+        if (!empty($expComment) && count($expComment) >= 2 ) {
             $item['comment'] = trim($expComment[1], "',");
         }
 
@@ -347,10 +360,11 @@ ENGINE = InnoDB
 CHARSET = utf8;
 ";
 
-$sql = $_POST['sql'];
 $parser = new CreateSqlParser();
-if(empty($sql)){
+if(empty($_POST['sql'])){
     $sql = $defaultSql;
+}else{
+    $sql = $_POST['sql'];
 }
 $ret = $parser->execute($sql);
 echo json_encode($ret);exit();

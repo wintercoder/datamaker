@@ -4,19 +4,19 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <link rel="stylesheet" href="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-    <link href="https://cdn.bootcss.com/bootstrap-table/1.12.1/bootstrap-table.min.css" rel="stylesheet">
-    <script src="https://cdn.bootcss.com/bootstrap-table/1.12.1/bootstrap-table.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.1/bootstrap-table.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.1/bootstrap-table.min.js"></script>
     <!--    下拉列表 1.3有BUG，选2.0版本 -->
-<!--    <link href="https://cdn.bootcss.com/bootstrap-select/2.0.0-beta1/css/bootstrap-select.min.css" rel="stylesheet" />-->
-<!--    <link href="https://cdn.bootcss.com/bootstrap-select/1.13.0-beta/css/bootstrap-select.min.css" rel="stylesheet">-->
-<!--    <script src="https://cdn.bootcss.com/bootstrap-select/1.13.0-beta/js/bootstrap-select.min.js"></script>-->
+<!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/2.0.0-beta1/css/bootstrap-select.min.css" rel="stylesheet" />-->
+<!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.0-beta/css/bootstrap-select.min.css" rel="stylesheet">-->
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.0-beta/js/bootstrap-select.min.js"></script>-->
 
-    <link href="https://cdn.bootcss.com/bootstrap-select/2.0.0-beta1/css/bootstrap-select.min.css" rel="stylesheet">
-    <script src="https://cdn.bootcss.com/bootstrap-select/2.0.0-beta1/js/bootstrap-select.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/2.0.0-beta1/css/bootstrap-select.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/2.0.0-beta1/js/bootstrap-select.min.js"></script>
     <link rel="shortcut icon" href="./favicon.png">
 
 
@@ -117,7 +117,13 @@ placeholder='CREATE TABLE `im_feed_reply` (
                         var jsonObj = JSON.parse(fileContent);
                         console.log("上传内容：");
                         console.log(jsonObj);
-                        fillTabelWithData(jsonObj);
+                        fillTabelWithData(jsonObj,true);
+
+                        //viewable
+                        showTime = 400;
+                        $('#select_table').show(showTime);
+                        $('#btn_group_gen').show(showTime);
+                        $('#tv_group_result').show(showTime);
                     };
                     fileReader.readAsText(this.files[0],'utf8');
                 });
@@ -139,13 +145,14 @@ placeholder='CREATE TABLE `im_feed_reply` (
 
             <div id="btn_group_gen" hidden>
                 <!-- 生成SQL的条数等 -->
-                <div class="col-md-1 column" >
-                    <button id="btn_commit_sql" type="submit" class="btn btn-info btn-default">Generate</button>
+                <div class="col-md-6 column" >
+                    <button id="btn_commit_sql" type="submit" class="btn btn-info btn-default col-md3 ">Generate</button>
+                    <input type="checkbox" name="cb_is_download" value="is_download" class=" col-md3 "/> Download
                 </div>
-                <div class="col-md-4 column" >
+                <div class="col-md-6 column" >
                     <form class="form-horizontal" role="form">
                         <div class="form-group">
-                            <div class="col-sm-3">
+                            <div class="col-md-3">
                                 <input type="number" class="form-control" id="tv_count" value="2"/>
                             </div>
                             <label class="col-3 control-label">Statement</label>
@@ -153,20 +160,20 @@ placeholder='CREATE TABLE `im_feed_reply` (
                     </form>
                 </div>
 
-                <div class="col-md-4 column">
+                <div class="col-md-6 column">
                     <form class="form-horizontal" role="form">
                         <div class="form-group">
+                            <label class="col-1 control-label">Records Merge Into One Statement</label>
                             <div class="col-sm-3">
                                 <input type="number" class="form-control" id="tv_group_size" value="3"/>
                             </div>
-                            <label class="col-2 control-label">Records merge into one</label>
                         </div>
                     </form>
                 </div>
 
-                <div class="col-md-3 column ">
+                <div class="col-md-6 column ">
                     <form class="form-horizontal form-inline" role="form">
-                        <label class="form-label ">Duplicate Key</label>
+                        <label class="form-label ">On Duplicate</label>
                         <select class="form-horizontal form-control  col-xs-12 selectpicker" id="selectpicker_insertway"  >
                             <option value="INSERT INTO ">Do Nothing</option>
                             <option value="INSERT IGNORE ">Ignore</option>
@@ -194,14 +201,14 @@ placeholder='CREATE TABLE `im_feed_reply` (
                         data:{
                             sql: $('#sql_create').val() //输入的SQL表结构字符串
                         },success:function(response,status){
-                            fillTabelWithData(response.data);
+                            fillTabelWithData(response.data,false);
                         },error:function(data,statsu){
                             alert("Network fail！");
                         }
                     })
                 }
                 //根据数据填充表格，用于默认值和导入，参数样例： {"list":[{"key":"id","method":"ignore","value":""},{"key":"parent_id","method":"rand_int","value":"1,100"}]}
-                function fillTabelWithData(responseData) {
+                function fillTabelWithData(responseData,isImport) {
                     $('#tv_tablename_hidden').val(responseData.table_name);   //隐藏框 存放表名
 
                     $('#table_tr').html('');
@@ -209,7 +216,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
                     $.each(responseData.list,function(i,val){
                         str = '';
                         str = str + '<tr id=item_' + i +'>';
-                        str = str + '<td> '+ '<input type="text" class="form-control" id="name" value='+val.key +'></td>';
+                        str = str + '<td> '+ '<input type="text" class="form-control" id="name_' + i +'" value='+val.key +'></td>';
 
                         //无法直接传对象当参数 ，也不能直接json字符串，否则跟onchange的双引号乱套，需要转码
                         var jsonVal = JSON.stringify(val);
@@ -251,7 +258,9 @@ placeholder='CREATE TABLE `im_feed_reply` (
                         $('#method_selectpicker_'+i).trigger('change');  //手动触发change事件
 
                         //设置接口返回的默认值 和 对应hover
-                        $("#tv_input_"+i).val( val.value );
+                        if(isImport){
+                            $("#tv_input_"+i).val( val.value );  //导入时才修改
+                        }
                         $("#tv_input_"+i).attr('data-content',getHoverContent( val.method ));
                     });
 
@@ -304,45 +313,10 @@ placeholder='CREATE TABLE `im_feed_reply` (
                     var brother = obj.parentNode.nextSibling;
                     var optionTxt = brother.children[0];    //参数文本框
                     var incrStrPre = ['William','John','TestShop','Product','SB'];
-                    switch (method) {
-                        case 'incr_int':
-                            optionTxt.value = 1;
-                            break;
-                        case 'rand_int':
-                        case 'rand_float':
-                            optionTxt.value = '1,100';
-                            break;
-                        case 'incr_day':
-                        case 'incr_day_grouply':
-                            optionTxt.value = 20180429;
-                            break;
-                        case 'ignore':
-                            optionTxt.value = '';
-                            optionTxt.placeholder = 'ignore this column, good for AUTO_INCREMENT';
-                            break;
-                        case 'rand_timestamp':
-                        case 'rand_timestamp_mysql':
-                            optionTxt.value = '20180401,20180404';
-                            break;
-                        case 'const_str':
-                            optionTxt.value = 'Google';
-                            break;
-                        case 'const_str_list':
-                            optionTxt.value = 'Google,Facebook,Microsoft';
-                            break;
-                        case 'rand_str':
-                            optionTxt.value = '5';
-                            break;
-                        case 'rand_str_list':
-                            optionTxt.value = 'Google,Facebook,Microsoft,Apple';
-                            break;
-                        case 'incr_str_prefix':
-                            optionTxt.value = incrStrPre[ Math.floor((incrStrPre.length-1) * Math.random()) ] ;
-                            break;
-                        case 'rand_pic_url':
-                            optionTxt.value = '300,400';
-                            break;
-                    }
+
+                    //修改hints
+                    optionTxt.placeholder = getDefaultValueByMethod(method);
+
                     //更换 生成规则 后 更新 hover
                     var currentId = obj.id.split('_')[2];   //当前点击第几行
                     $("#tv_input_"+currentId).attr('data-content',getHoverContent( method ));
@@ -384,6 +358,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
                     });
                     var exportData =  new Object();
                     exportData['list'] = fieldList;
+                    exportData['table_name'] = $('#tv_tablename_hidden').val();
                     exportData = JSON.stringify(exportData);
                     createAndDownloadFile("config_export.txt",exportData);
                 });
@@ -401,14 +376,20 @@ placeholder='CREATE TABLE `im_feed_reply` (
 
                             var key = tdArr.eq(0).find('input').val();     //字段名
                             var method = tdArr.eq(1).find('select').val(); //method
-                            var option = tdArr.eq(2).find('input').val();  //参数
+                            var inputValue = tdArr.eq(2).find('input').val();  //参数
+
+
+                            //什么都不填的时候，调接口的默认值
+                            if(inputValue == null || inputValue == "" || inputValue == 'undefined'){
+                                inputValue = getDefaultValueByMethod(method);
+                            }
 
                             var item = new Object();
                             item['key'] = key;
                             item['method'] = method;
-                            item['value'] = option;
+                            item['value'] = inputValue;
                             if(method == 'const_str_list'){
-                                constListSize = Math.min(constListSize,option.split(',').length);
+                                constListSize = Math.min(constListSize,inputValue.split(',').length);
                             }
                             fieldList.push(item);
                         });
@@ -423,19 +404,61 @@ placeholder='CREATE TABLE `im_feed_reply` (
                         }
 
                         params['count'] = $('#tv_count').val();
-                        params['count'] = params['count'] > 5000 ?  5000 : params['count'];
+                        if(params['count'] > 5000){
+                            $('#sql_result').val('count > 5000, better to build on your server');
+                            return;
+                        }
                         var tablename = $('#tv_tablename_hidden').val();
-                        params['table_name'] = (tablename == '') ? 'table_name' : tablename;
+                        params['table_name'] = (tablename == '' || tablename == 'undefined') ? 'table_name' : tablename;
 
 
                         //发JSON，生成SQL
                         params = JSON.stringify(params);
                         $.post('gensql.php',params,function(data){
-                            $('#sql_result').val(data);
+                           if( $('input[name="cb_is_download"]:checked').length == 1){   //下载框被选中
+                                $('#sql_result').val('broswer should begin download');
+                                createAndDownloadFile('datamaker_' + params['table_name'] + '.sql',data);
+                          }else{
+                                //正常展示
+                                $('#sql_result').val(data);
+                          }
                         });
                     });
                 });
 
+
+                function getDefaultValueByMethod(methodParams) {
+                    switch (methodParams) {
+                        case 'incr_int':
+                            return 1;
+                        case 'rand_int':
+                            return '1,100';
+                        case 'rand_float':
+                            return '1,100,2';
+                        case 'incr_day':
+                        case 'incr_day_grouply':
+                            return 20180401;
+                        case 'ignore':
+                            return 'ignore this column, good for AUTO_INCREMENT';
+                        case 'rand_timestamp':
+                        case 'rand_timestamp_mysql':
+                            return '20180401,20180404';
+                        case 'const_str':
+                            return 'Goolge';
+                        case 'const_str_list':
+                            return 'Google,Facebook,Microsoft';
+                        case 'rand_str':
+                            return '5';
+                        case 'rand_str_list':
+                            return 'Google,Facebook,Microsoft,Apple';
+                        case 'incr_str_prefix':
+                            // var incrStrPre = ['老王','射击狮','测试店','产品经理','程序员','码农','攻城狮','SB'];
+                            // return incrStrPre[ Math.floor((incrStrPre.length-1) * Math.random()) ] ;
+                            return 'PM-';
+                        case 'rand_pic_url':
+                            return '300,400';
+                    }
+                }
 
                 /**
                  * 工具函数： 创建并下载文件，用于导出

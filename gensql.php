@@ -7,7 +7,7 @@ class ValueGenerator{
     }
 
     /**
-     * 日期自增，全局自增模式 
+     * 日期自增，全局自增模式
      * @param $input array
      *      从 from值 开始自增 格式: 20180301
      * @param $groupSize int 每组多少条合并成一个数组，也是该次函数返回的数组大小
@@ -29,7 +29,7 @@ class ValueGenerator{
     }
 
     /**
-     * 日期自增，组递增模式，每组的日期相同  
+     * 日期自增，组递增模式，每组的日期相同
      * @param $input array
      *      从 from值 开始自增 格式: 20180301
      * @param $groupSize int 每组多少条合并成一个数组，也是该次函数返回的数组大小
@@ -98,7 +98,7 @@ class ValueGenerator{
     public function randFloat($input,$groupSize)
     {
         $exp = explode(',',$input);
-        if(empty($exp)){
+        if(empty($exp) ){
             $from = 0; $to = 1;$wei = 3;
         }else{
             $from =  intval($exp[0]); $to = intval($exp[1]); $wei = intval($exp[2]);
@@ -125,7 +125,7 @@ class ValueGenerator{
     {
         $exp = explode(',',$input);
         $from = !empty($exp[0]) ? intval($exp[0]) : 20180401;
-        $to = !empty($exp[1]) ? intval($exp[1]) : 20180404;
+        $to = !empty($exp[1]) ? intval($exp[1]) : 20380101;
         $diff = strtotime($to) - strtotime($from);
         $ret = [];
         $count = 0;
@@ -256,6 +256,30 @@ class ValueGenerator{
 
 class WorkHandler{
 
+    // /**
+    //  * 同步的数据导出，格式为.sql
+    // */
+    // public function syncExportStr2File($fileName, $content){
+    //     header_remove();
+    //     ini_set('memory_limit', '128M');
+    //     set_time_limit(1800);
+    //     header("Content-type:text/html;charset=utf-8");
+    //     // header("Content-Transfer-Encoding: binary");
+    //     // header("Content-Type: application/force-download;");
+    //     header("Content-type: application/octet-stream");
+    //     header("Cache-control: no-cache");
+    //     header("Content-Transfer-Encoding: binary");
+    //     header("Content-Disposition: attachment; filename=$fileName.sql");
+    //     header("Expires: 0");
+    //     header("Cache-control: private");
+    //     header("Pragma: no-cache");
+    //     header('Content-Length: ' . strlen($content));
+
+    //     // $content = iconv('UTF-8', 'GBK//IGNORE', $content);
+    //     echo $content.PHP_EOL;
+    //     exit();
+    // }
+
     public function checkParams($input){
         $input = json_decode($input,true);  //json转数组
         if(empty($input) || empty($input['list'])){
@@ -320,6 +344,8 @@ class WorkHandler{
             $sql .= "\n";
             $sql .= "\n";
         }
+        //一直没成功，还怀疑是jq的post方法不是超链导致，最终用前端去做了
+        // $this->syncExportStr2File('datamake_'.date('YmdHis', time()).'sql' ,$sql);
         echo $sql;
     }
 
