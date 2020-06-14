@@ -27,7 +27,7 @@ INSERT INTO `student (user_id,name) VALUES ('10003','John3'),('10004','John4');
 
 
 
-**[Try It Now ](http://datamake.online/index_en.php)**
+**[Try It Now ](http://datamaker.online/index_en.php)**
 
 
 
