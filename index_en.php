@@ -293,7 +293,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
                         case 'const_str':
                             return "Const";
                         case 'const_str_list':
-                            return "Input: </br>Google,Facebook,Microsoft; </br> SQL line:2;</br>  Group with 3 value</br> Output:  <br />Google,Facebook,Microsoft<br />Google,Facebook,Microsoft";
+                            return "Input: </br>Google$#$Facebook$#$Microsoft; </br>Config: SQL line:2;</br>  Group with 3 value</br> Output:  <br />Google$#$Facebook$#$Microsoft<br />Google$#$Facebook$#$Microsoft";
                         case 'rand_str':
                             return 'Input: Length of string</br> Output: Random String with alphabet';
                         case 'rand_str_list':
@@ -389,7 +389,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
                             item['method'] = method;
                             item['value'] = inputValue;
                             if(method == 'const_str_list'){
-                                constListSize = Math.min(constListSize,inputValue.split(',').length);
+                                constListSize = Math.min(constListSize,inputValue.split('$#$').length);
                             }
                             fieldList.push(item);
                         });
@@ -446,7 +446,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
                         case 'const_str':
                             return 'Goolge';
                         case 'const_str_list':
-                            return 'Google,Facebook,Microsoft';
+                            return 'Google$#$Facebook$#$Microsoft';
                         case 'rand_str':
                             return '5';
                         case 'rand_str_list':
