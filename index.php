@@ -298,7 +298,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
                         case 'const_str':
                             return "不解释";
                         case 'const_str_list':
-                            return "输入：百度,阿里,腾讯；2条SQL，3值合一组</br> 输出： <br />百度,阿里,腾讯<br />百度,阿里,腾讯<br /> <br /> 按照列表中的元素生成，每个元素按顺序出现，输入元素间用英文逗号分隔。</br> <br /> 有多个常量列表则并行出现，输出SQL以 min(元素个数) 为一组";
+                            return "输入：百度$#$阿里$#$腾讯；配置2条SQL，3值合一组</br> 输出： <br />百度$#$阿里$#$腾讯<br />百度$#$阿里$#$腾讯<br /> <br /> 按照列表中的元素生成，每个元素按顺序出现，输入元素间用特殊符（$#$）分隔。</br> <br />以前是用逗号，但怕内容本身包含逗号</br> <br />  有多个常量列表则并行出现，输出SQL以 min(元素个数) 为一组";
                         case 'rand_str':
                             return '输入：长度</br> 输出：随机字符串，字符集：字母表';
                         case 'rand_str_list':
@@ -392,7 +392,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
                             item['method'] = method;
                             item['value'] = inputValue;
                             if(method == 'const_str_list'){
-                                constListSize = Math.min(constListSize,inputValue.split(',').length);
+                                constListSize = Math.min(constListSize,inputValue.split('$#$').length);
                             }
                             fieldList.push(item);
                         });
@@ -450,7 +450,7 @@ placeholder='CREATE TABLE `im_feed_reply` (
                         case 'const_str':
                             return 'Goolge';
                         case 'const_str_list':
-                            return '百度,阿里,腾讯';
+                            return '百度$#$阿里$#$腾讯';
                         case 'rand_str':
                             return '5';
                         case 'rand_str_list':

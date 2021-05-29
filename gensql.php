@@ -159,7 +159,7 @@ class ValueGenerator{
      * @return array
      */
     public function constStr($input,$groupSize){
-        return explode(',',str_repeat($input.',',$groupSize));
+        return explode('$#$',str_repeat($input.'$#$',$groupSize));
     }
 
 
@@ -171,8 +171,8 @@ class ValueGenerator{
      * @return array
      */
     public function constStrList($input,$groupSize){
-        $input = !empty($input) ? $input : '百度,阿里,腾讯';
-        return explode(',',$input);
+        $input = !empty($input) ? $input : '百度$#$阿里$#$腾讯';
+        return explode('$#$',$input);
     }
 
     /**
